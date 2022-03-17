@@ -64,14 +64,16 @@ def check_squares(matrix):
 
 
 def check_repeats(received_list):
-    list = received_list.copy()
+    # d=[i for i in received_list if i!=0]
+    # return len(set(d))==len(d)
+    d=received_list.copy()
     occur = []
-    while (list.count(0)):
-        list.remove(0)
+    while (d.count(0)):
+        d.remove(0)
 
-    for i in list:
+    for i in d:
         if i < 10:
-            occur.append(list.count(i))
+            occur.append(d.count(i))
         else:
             return False
 
@@ -87,6 +89,8 @@ def validate_sudoku(matrix):
 
 
 def build_zero_list(matrix):
+    #list comprehension
+    # return [[r,c] for r in range(9) for c in range(9) if matrix[r][c] == 0]
     row_index = 0
     for row in matrix:
         column_index = 0
@@ -100,34 +104,27 @@ def build_zero_list(matrix):
 
 
 def solve_sudoku(matrix, index=0):
-    row_index = zero_list[index][0]
-    col_index = zero_list[index][1]
+    while index<len(zero_list):
+        row_index = zero_list[index][0]
+        col_index = zero_list[index][1]
 
-    current_val = matrix[zero_list[index][0]][zero_list[index][1]]
-    current_val += 1
-    matrix[zero_list[index][0]][zero_list[index][1]] = current_val
+        matrix[row_index][col_index]+=1
 
-    for item in matrix:
-        print(item)
-
-    if current_val >= 10:
-        matrix[zero_list[index][0]][zero_list[index][1]] = 0
-        # oops, jump back
-        solve_sudoku(matrix, index-1)
-    else:
-        if check_rows(matrix):
-            if check_cols(matrix):
-                if check_squares(matrix):
-                    # value is good, jump to next empty position
-                    solve_sudoku(matrix, index+1)
-                else:
-                    solve_sudoku(matrix, index)
-            else:
-                solve_sudoku(matrix, index)
+        for item in matrix:
+            print(item)
+        print()
+        if matrix[row_index][col_index] >= 10:
+            matrix[row_index][col_index] = 0
+            # oops, jump back
+            return False
         else:
-            solve_sudoku(matrix, index)
+            if check_rows(matrix) and check_cols(matrix) and check_squares(matrix):
+                # value is good, jump to next empty position
+                if solve_sudoku(matrix, index+1):
+                    return True
+    return True
 
-    return matrix
+
 
 sudoku = [
         [2, 5, 0, 0, 3, 0, 9, 0, 1],
@@ -140,15 +137,21 @@ sudoku = [
         [0, 7, 0, 0, 0, 0, 0, 0, 3],
         [9, 0, 3, 0, 0, 0, 6, 0, 4]
     ]
-
+sudoku2= [
+    [5,3,0,0,7,0,0,0,0],
+    [6,0,0,1,9,5,0,0,0],
+    [0,9,8,0,0,0,0,6,0],
+    [8,0,0,0,6,0,0,0,3],
+    [4,0,0,8,0,3,0,0,1],
+    [7,0,0,0,2,0,0,0,6],
+    [0,6,0,0,0,0,2,8,0],
+    [0,0,0,4,1,9,0,0,5],
+    [0,0,0,0,8,0,0,7,9]
+]
 zero_list = []
 
 
 if __name__ == '__main__':
-    build_zero_list(sudoku)
-    #solve_sudoku(sudoku)
-
     sys.setrecursionlimit(10000)
-    threading.stack_size(20000000)
-    thread = threading.Thread(target=solve_sudoku(sudoku))
-    thread.start()
+    build_zero_list(sudoku)
+    solve_sudoku(sudoku)
